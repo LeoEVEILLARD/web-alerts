@@ -18,6 +18,15 @@ fn get_env(name: &str) -> String {
     env::var(name).unwrap_or_else(|_| panic!("Please define {}", name))
 }
 
+pub fn test_mail_config()
+{
+        let mut test = SMTP_USERNAME.to_owned();
+        test = SMTP_KEY.to_owned();
+        test = SMTP_ADRESS.to_owned();
+        test = FROM_ADRESS.to_owned();
+        test = TO_ADRESS.to_owned();
+}
+
 
 pub fn send_mail(mail_subject :String, mail_body :String) {  
 

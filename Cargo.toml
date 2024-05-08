@@ -11,3 +11,4 @@ curl = "0.4.46"
 lazy_static = "1.4"
 chrono = "0.4"
 tokio = { version = "1", features = ["full"] }
+regex = "1.10.4"
