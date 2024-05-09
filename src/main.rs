@@ -8,9 +8,10 @@ use std::fs::File;
 use std::io::{self, BufRead};
 use std::path::Path;
 
+use std::env;
+
 
 static SEND_FAILING_MAIL_DAYS_FREQUENCY: i64 = 10;
-use utils::*;
 
 use regex::Regex;
 
@@ -82,8 +83,10 @@ fn check_whiskey_app() -> (bool, String)
 {
     let whiskey_adress = "https://docs.getwhisky.app/game-support/index.html";
 
-    let path = Path::new("./Resources/whiskeyapp_supported_games_list.txt");
-    let file = File::open(&path).expect("cannot open file !");
+
+    let exe_path = env::current_exe().ok().unwrap();
+    let supported_games_file = exe_path.parent().unwrap().parent().unwrap().parent().unwrap().join("Resources").join("whiskeyapp_supported_games_list.txt");
+    let file = File::open(&supported_games_file).expect("cannot open file !");
     let actuals_supported_games: Vec<String> = io::BufReader::new(file)
         .lines()
         .map(|line| line.unwrap())
