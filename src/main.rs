@@ -19,7 +19,6 @@ use regex::Regex;
 
 fn main()
 {
-
     utils::test_mail_config();
 
     let mut something_new = false;
@@ -44,6 +43,15 @@ fn main()
         succes_email_body.push_str(&whiskey_message);
     } 
 
+    let (powerduck_result, powerduck_message) = check_powerduck();
+
+    something_new = something_new || powerduck_result;
+    if powerduck_result 
+    {
+        succes_email_body.push_str("* ");
+        succes_email_body.push_str(&powerduck_message);
+    } 
+
     if something_new
     {
         utils::send_mail("Something new!".to_string(), succes_email_body.to_string());
@@ -54,7 +62,8 @@ fn main()
     let days_since_epoch = duration.num_days();
     if days_since_epoch%SEND_FAILING_MAIL_DAYS_FREQUENCY == 0
     {
-        utils::send_mail("Nothing new!".to_string(), "Nothing new, but I'm just saying this script is alive, I'll send that mail every {SEND_FAILING_MAIL_DAYS_FREQUENCY} days".to_string());
+        
+        utils::send_mail("Nothing new!".to_string(), format!("Nothing new, but I'm just saying this script is alive, I'll send that mail every {SEND_FAILING_MAIL_DAYS_FREQUENCY} days"));
     }
 }
 
@@ -139,4 +148,35 @@ fn check_whiskey_app() -> (bool, String)
     (new_game_found, mail_message)
 }
 
- 
+ fn check_powerduck()-> (bool, String)
+ {
+    let powerduck_adress = "https://direct-editeurs.fr/magazine/13193_les-chroniques-de-fantomiald-hs-powerduck_1";
+    let powerduck_last_parution_number = 3;
+    let mut easy = Easy::new();
+    easy.url(powerduck_adress).unwrap();
+
+    let mut web_content = String::new();
+    {
+        let mut transfer = easy.transfer();
+        transfer.write_function(|data| {
+            web_content.push_str(std::str::from_utf8(data).unwrap());
+            Ok(data.len())
+        }).unwrap();
+        transfer.perform().unwrap();
+    }
+
+    let parution_number_to_find = powerduck_last_parution_number + 1;
+    let link_to_find = format!("<a href=\"/magazine/13193_les-chroniques-de-fantomiald-hs-powerduck_{parution_number_to_find}\">");
+
+    let found = web_content.contains(&link_to_find);
+    let mut message = String::new();
+    if found{
+        print!("found");
+        message.push_str("It seems to be a new volume for PowerDuck : Volume ");
+        message.push_str(&parution_number_to_find.to_string());
+        message.push_str(". Please check out ");
+        message.push_str(&powerduck_adress);
+    }
+
+    (found, message)
+ }
